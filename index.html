@@ -3,74 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EROL HOLDING - EXECUTIVE TYCOON v2.0</title>
+  <title>EROL HOLDING - ULTIMATE FINANCIAL TERMINAL v3.0</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      --bg: #08080c;
-      --panel: #111118;
+      --bg: #050508;
+      --panel: #0d0d14;
       --border: rgba(212, 175, 55, 0.3);
       --gold: #d4af37;
       --gold-bright: #fff0a5;
       --white: #f5f5f5;
-      --gray: #888899;
+      --gray: #777788;
       --green: #00ff88;
       --red: #ff3366;
+      --blue: #00ccff;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     body { background-color: var(--bg); color: var(--white); padding: 15px; min-height: 100vh; overflow-x: hidden; }
 
-    /* Header & Status */
-    header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
-    .brand { font-size: 1rem; letter-spacing: 3px; font-weight: 700; color: var(--gold); display: flex; align-items: center; gap: 10px; }
+    header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .brand { font-size: 0.95rem; letter-spacing: 2.5px; font-weight: 700; color: var(--gold); display: flex; align-items: center; gap: 8px; }
     .pulse-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green); animation: pulse 1.5s infinite; }
     @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
-    .rank-badge { background: rgba(212, 175, 55, 0.1); border: 1px solid var(--gold); color: var(--gold-bright); padding: 4px 10px; border-radius: 4px; font-family: monospace; font-size: 0.75rem; letter-spacing: 1px; }
+    .rank-badge { background: rgba(212, 175, 55, 0.1); border: 1px solid var(--gold); color: var(--gold-bright); padding: 4px 10px; border-radius: 4px; font-family: monospace; font-size: 0.75rem; }
 
-    /* Vault & Financial Hub */
-    .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin: 15px 0; }
-    .main-vault { background: linear-gradient(135deg, #14141e 0%, #0a0a10 100%); border: 1px solid var(--border); border-radius: 6px; padding: 20px; position: relative; overflow: hidden; }
-    .vault-title { font-size: 0.7rem; color: var(--gray); letter-spacing: 2px; text-transform: uppercase; }
-    .vault-amount { font-size: 2.5rem; font-family: monospace; color: var(--gold-bright); text-shadow: 0 0 15px rgba(212, 175, 55, 0.2); margin: 8px 0; }
-    .vault-stats { display: flex; gap: 20px; font-family: monospace; font-size: 0.8rem; }
+    .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin: 12px 0; }
+    .main-vault { background: linear-gradient(135deg, #12121c 0%, #08080d 100%); border: 1px solid var(--border); border-radius: 6px; padding: 18px; }
+    .vault-title { font-size: 0.65rem; color: var(--gray); letter-spacing: 2px; text-transform: uppercase; }
+    .vault-amount { font-size: 2.3rem; font-family: monospace; color: var(--gold-bright); text-shadow: 0 0 15px rgba(212, 175, 55, 0.2); margin: 6px 0; }
+    .vault-stats { display: flex; gap: 15px; font-family: monospace; font-size: 0.75rem; flex-wrap: wrap; }
     .stat-green { color: var(--green); }
     .stat-red { color: var(--red); }
+    .stat-blue { color: var(--blue); }
 
-    /* Banka & Kredi Paneli */
-    .bank-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between; }
-    .panel-title { font-size: 0.75rem; color: var(--gold); letter-spacing: 1.5px; font-weight: bold; margin-bottom: 10px; }
+    .bank-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; }
+    .panel-title { font-size: 0.75rem; color: var(--gold); letter-spacing: 1.5px; font-weight: bold; margin-bottom: 8px; }
 
-    /* Grafik Konteyneri */
-    .chart-container { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 15px; margin-bottom: 15px; height: 200px; }
+    .chart-container { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-bottom: 12px; height: 160px; }
+    .ticker-tape { background: #000; border: 1px solid var(--border); border-radius: 4px; padding: 8px; font-family: monospace; font-size: 0.75rem; color: var(--gold-bright); text-align: center; margin-bottom: 12px; }
 
-    /* Borsa Haberleri Ticker */
-    .ticker-tape { background: #000; border: 1px solid var(--border); border-radius: 4px; padding: 10px; font-family: monospace; font-size: 0.8rem; color: var(--gold-bright); text-align: center; margin-bottom: 15px; }
-
-    /* Sekme Menüsü */
-    .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-    .tab-btn { background: var(--panel); border: 1px solid var(--border); color: var(--gray); padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; transition: 0.3s; font-size: 0.8rem; letter-spacing: 1px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 5px; }
+    .tab-btn { background: var(--panel); border: 1px solid var(--border); color: var(--gray); padding: 8px 16px; font-weight: bold; cursor: pointer; border-radius: 4px; transition: 0.2s; font-size: 0.75rem; letter-spacing: 1px; white-space: nowrap; }
     .tab-btn.active, .tab-btn:hover { background: var(--gold); color: #000; border-color: var(--gold); }
 
-    /* Kart Izgaraları */
     .tab-content { display: none; }
-    .tab-content.active { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+    .tab-content.active { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
 
-    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s; }
-    .card:hover { border-color: var(--gold); box-shadow: 0 0 15px rgba(212, 175, 55, 0.1); }
-    .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .card-title { font-weight: bold; font-size: 0.9rem; }
-    .card-count { color: var(--gold); font-family: monospace; font-size: 0.85rem; }
-    .card-info { font-size: 0.75rem; color: var(--gray); font-family: monospace; margin-bottom: 12px; line-height: 1.4; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; }
+    .card:hover { border-color: var(--gold); box-shadow: 0 0 12px rgba(212, 175, 55, 0.1); }
+    .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .card-title { font-weight: bold; font-size: 0.85rem; }
+    .card-count { color: var(--gold); font-family: monospace; font-size: 0.8rem; }
+    .card-info { font-size: 0.7rem; color: var(--gray); font-family: monospace; margin-bottom: 10px; line-height: 1.4; }
 
-    /* Butonlar */
-    .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 8px 12px; font-weight: bold; font-size: 0.75rem; cursor: pointer; border-radius: 4px; transition: 0.2s; font-family: monospace; width: 100%; text-align: center; }
+    .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 7px 10px; font-weight: bold; font-size: 0.7rem; cursor: pointer; border-radius: 4px; transition: 0.2s; font-family: monospace; width: 100%; text-align: center; }
     .btn:hover:not(:disabled) { background: var(--gold); color: #000; }
-    .btn:disabled { border-color: #333; color: #444; cursor: not-allowed; }
+    .btn:disabled { border-color: #222; color: #444; cursor: not-allowed; }
     .btn-red { border-color: var(--red); color: var(--red); }
     .btn-red:hover:not(:disabled) { background: var(--red); color: #fff; }
+    .btn-blue { border-color: var(--blue); color: var(--blue); }
+    .btn-blue:hover:not(:disabled) { background: var(--blue); color: #000; }
 
-    footer { display: flex; justify-content: space-between; padding-top: 15px; border-top: 1px solid var(--border); font-size: 0.7rem; color: var(--gray); font-family: monospace; margin-top: 20px; }
+    footer { display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--border); font-size: 0.65rem; color: var(--gray); font-family: monospace; margin-top: 15px; }
   </style>
 </head>
 <body>
@@ -78,64 +73,81 @@
   <header>
     <div class="brand">
       <div class="pulse-dot"></div>
-      EROL HOLDING EXECUTIVE TERMINAL v2.0
+      EROL HOLDING FINANCIAL TERMINAL v3.0
     </div>
     <div class="rank-badge" id="player-rank">STAJYER YATIRIMCI</div>
   </header>
 
-  <!-- Ana Borsa & Bakiye Ekranı -->
   <div class="dashboard-grid">
     <div class="main-vault">
-      <div class="vault-title">TOPLAM NET SERVET</div>
+      <div class="vault-title">NET SERVET / KASA</div>
       <div class="vault-amount" id="balance-display">$10,000</div>
       <div class="vault-stats">
-        <div>PASİF GELİR: <span class="stat-green" id="income-display">+$0/sn</span></div>
-        <div>KREDİ BORCU: <span class="stat-red" id="debt-display">$0</span></div>
+        <div>GELİR: <span class="stat-green" id="income-display">+$0/sn</span></div>
+        <div>BORÇ: <span class="stat-red" id="debt-display">$0</span></div>
+        <div>PRESTİJ ÇARPAN: <span class="stat-blue" id="prestige-display">1.0x</span></div>
       </div>
     </div>
 
-    <!-- Banka Kreditörü -->
     <div class="bank-panel">
-      <div class="panel-title">MERKEZ BANKASI KREDİSİ</div>
-      <div style="font-size:0.75rem; color:var(--gray); font-family:monospace; margin-bottom:8px;" id="loan-info">Limit: $50,000</div>
-      <button class="btn" id="take-loan-btn" onclick="takeLoan()">$25,000 KREDİ ÇEK</button>
-      <button class="btn btn-red" style="margin-top:5px;" onclick="payLoan()">KREDİ ÖDE ($25,000)</button>
+      <div class="panel-title">MERKEZ BANKASI</div>
+      <div style="font-size:0.7rem; color:var(--gray); font-family:monospace; margin-bottom:6px;" id="loan-info">Limit: $50,000</div>
+      <button class="btn" onclick="takeLoan()">$25,000 KREDİ ÇEK</button>
+      <button class="btn btn-red" style="margin-top:4px;" onclick="payAllLoan()" id="pay-loan-btn">TÜM BORCU ÖDE</button>
     </div>
   </div>
 
-  <!-- Live Chart (Canlı Hisse Grafiği) -->
   <div class="chart-container">
     <canvas id="marketChart"></canvas>
   </div>
 
-  <!-- Canlı Borsa Ticker -->
   <div class="ticker-tape" id="news-ticker">
-    • Piyasalar açıldı. Borsa verileri gerçek zamanlı işleniyor...
+    • Piyasa açık. Tüm küresel finansal veri akışı canlı işleniyor...
   </div>
 
-  <!-- Sekmeler -->
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('businesses')">ŞİRKETLERİM</button>
-    <button class="tab-btn" onclick="switchTab('executives')">CEO & YÖNETİCİ AĞI</button>
-    <button class="tab-btn" onclick="switchTab('investments')">KARABORSA & KRİPTO</button>
+    <button class="tab-btn" onclick="switchTab('executives')">CEO & YÖNETİCİLER</button>
+    <button class="tab-btn" onclick="switchTab('stocks')">CANLI BORSA HİSSELERİ</button>
+    <button class="tab-btn" onclick="switchTab('casino')">VIP CASINO</button>
+    <button class="tab-btn" onclick="switchTab('prestige')">PRESTİJ & REBIRTH</button>
   </div>
 
-  <!-- Şirketler Sekmesi -->
+  <!-- Şirketler -->
   <div class="tab-content active" id="tab-businesses"></div>
 
-  <!-- Yöneticiler Sekmesi -->
+  <!-- Yöneticiler -->
   <div class="tab-content" id="tab-executives"></div>
 
-  <!-- Karaborsa / Kripto Sekmesi -->
-  <div class="tab-content" id="tab-investments"></div>
+  <!-- Borsa Hisseleri -->
+  <div class="tab-content" id="tab-stocks"></div>
+
+  <!-- Casino -->
+  <div class="tab-content" id="tab-casino">
+    <div class="card">
+      <div class="card-head"><span class="card-title">VIP Kırmızı / Siyah Rulet</span></div>
+      <div class="card-info">Sermayeni 2'ye katlama şansı! Şansın varsa servet kazanırsın.</div>
+      <button class="btn btn-blue" onclick="playRoulette(10000)">$10,000 BAHİS OYNA</button>
+      <button class="btn btn-blue" style="margin-top:5px;" onclick="playRoulette(100000)">$100,000 BAHİS OYNA</button>
+    </div>
+  </div>
+
+  <!-- Prestij -->
+  <div class="tab-content" id="tab-prestige">
+    <div class="card">
+      <div class="card-head"><span class="card-title">Holding Satış & Rebirth</span></div>
+      <div class="card-info">Tüm şirketlerini ve paranı sıfırlayarak holdingini devredersin. Karşılığında **Kalıcı Gelir Çarpanı** kazanırsın!</div>
+      <button class="btn btn-red" onclick="doPrestige()">PRESTİJ YAP (TÜM GELİRİ KATLA)</button>
+    </div>
+  </div>
 
   <footer>
-    <div>SECURE ENCRYPTION: 1024-BIT SSL</div>
-    <div>EMPIRE CORE ENGINE v2.0</div>
+    <div>SECURE ENCRYPTION: 2048-BIT SSL</div>
+    <div>ULTIMATE FINANCIAL CORE v3.0</div>
   </footer>
 
   <script>
-    // Audio Synthesizer (Ses Efektleri için Dahili Web Audio API)
+    // Audio Synthesizer
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(freq, duration, type="sine") {
       try {
@@ -143,7 +155,7 @@
         const gain = audioCtx.createGain();
         osc.type = type;
         osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
@@ -157,38 +169,39 @@
     let debt = 0;
     let maxLoan = 50000;
     let incomePerSec = 0;
+    let prestigeMultiplier = 1.0;
 
     // Şirketler
     const businesses = [
-      { id: 'coffee', name: 'Lüks Kahve Zinciri', baseCost: 150, income: 10, count: 0 },
-      { id: 'perfume', name: 'Niş Parfüm Evi', baseCost: 1500, income: 90, count: 0 },
-      { id: 'tech', name: 'Yazılım & AI Ajansı', baseCost: 15000, income: 800, count: 0 },
-      { id: 'crypto', name: 'Kripto Madencilik Tesisi', baseCost: 150000, income: 7500, count: 0 },
-      { id: 'bank', name: 'Özel Yatırım Bankası', baseCost: 2000000, income: 85000, count: 0 },
-      { id: 'space', name: 'Uzay Roket Sanayii', baseCost: 25000000, income: 950000, count: 0 }
+      { id: 'coffee', name: 'Lüks Kahve Zinciri', baseCost: 150, income: 10, count: 0, level: 1 },
+      { id: 'perfume', name: 'Niş Parfüm Evi', baseCost: 1500, income: 90, count: 0, level: 1 },
+      { id: 'tech', name: 'Yazılım & AI Ajansı', baseCost: 15000, income: 800, count: 0, level: 1 },
+      { id: 'crypto', name: 'Kripto Madencilik Tesisi', baseCost: 150000, income: 7500, count: 0, level: 1 },
+      { id: 'bank', name: 'Özel Yatırım Bankası', baseCost: 2000000, income: 85000, count: 0, level: 1 },
+      { id: 'space', name: 'Uzay Roket Sanayii', baseCost: 25000000, income: 950000, count: 0, level: 1 }
     ];
 
-    // Yöneticiler (Geliri katlayan CEO'lar)
+    // Yöneticiler
     const executives = [
-      { id: 'cfo', name: 'Finans Direktörü (CFO)', cost: 50000, boost: 1.2, hired: false, desc: 'Tüm şirket gelirlerini %20 artırır.' },
-      { id: 'cto', name: 'Teknoloji Lideri (CTO)', cost: 250000, boost: 1.5, hired: false, desc: 'Tüm şirket gelirlerini %50 artırır.' },
-      { id: 'lobby', name: 'Lobi Şirketi Başkanı', cost: 2000000, boost: 2.0, hired: false, desc: 'Tüm şirket gelirlerini 2 katına çıkarır.' }
+      { id: 'cfo', name: 'Finans Direktörü (CFO)', cost: 50000, boost: 1.25, hired: false, desc: 'Tüm gelirleri %25 artırır.' },
+      { id: 'cto', name: 'Teknoloji Lideri (CTO)', cost: 300000, boost: 1.5, hired: false, desc: 'Tüm gelirleri %50 artırır.' },
+      { id: 'lobby', name: 'Lobi Şirketi Başkanı', cost: 2500000, boost: 2.0, hired: false, desc: 'Tüm gelirleri 2 katına çıkarır.' }
     ];
 
-    // Karaborsa Yatırımları
-    const investments = [
-      { id: 'gold_vault', name: 'Külçe Altın Rezervi', cost: 100000, income: 4000, count: 0 },
-      { id: 'rare_art', name: 'Nadir Tablo Koleksiyonu', cost: 1000000, income: 45000, count: 0 },
-      { id: 'island', name: 'Özel Tropik Ada', cost: 50000000, income: 2500000, count: 0 }
+    // Canlı Borsa Hisseleri
+    const stocks = [
+      { id: 'tesla', name: 'TSLA - Elektrikli Araç', price: 200, shares: 0 },
+      { id: 'nvidia', name: 'NVDA - Yapay Zeka Çipi', price: 500, shares: 0 },
+      { id: 'apple', name: 'AAPL - Teknoloji Devi', price: 180, shares: 0 }
     ];
 
     // Chart.js Kurulumu
     const ctx = document.getElementById('marketChart').getContext('2d');
-    const chartData = [10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000];
+    const chartData = Array(10).fill(10000);
     const marketChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: ['', '', '', '', '', '', '', '', '', ''],
+        labels: Array(10).fill(''),
         datasets: [{
           label: 'Holding Değeri ($)',
           data: chartData,
@@ -204,49 +217,38 @@
         responsive: true,
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
-        scales: {
-          x: { display: false },
-          y: { grid: { color: 'rgba(212,175,55,0.05)' }, ticks: { color: '#666' } }
-        }
+        scales: { x: { display: false }, y: { grid: { color: 'rgba(212,175,55,0.05)' }, ticks: { color: '#666' } } }
       }
     });
 
-    // Sekme Değiştirme
     function switchTab(tabId) {
       playSound(400, 0.05);
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-      
       event.target.classList.add('active');
       document.getElementById('tab-' + tabId).classList.add('active');
     }
 
-    // Ünvan Belirleme
     function getRank(val) {
       if (val < 100000) return 'STAJYER YATIRIMCI';
-      if (val < 1000000) return 'GİRSİMCİ PATRON';
+      if (val < 1000000) return 'GİRİŞİMCİ PATRON';
       if (val < 20000000) return 'HOLDİNG CEO\'SU';
       if (val < 500000000) return 'KÜRESEL MİLYARDER';
       return 'DÜNYA EKONOMİ LİDERİ';
     }
 
-    // Gelir Hesaplama
     function calculateIncome() {
-      let baseIncome = businesses.reduce((acc, b) => acc + (b.income * b.count), 0);
-      baseIncome += investments.reduce((acc, i) => acc + (i.income * i.count), 0);
-
-      // Yöneticilerin Katran Etkisi
-      let multiplier = 1;
+      let baseIncome = businesses.reduce((acc, b) => acc + (b.income * b.count * b.level), 0);
+      let multiplier = prestigeMultiplier;
       executives.forEach(e => { if (e.hired) multiplier *= e.boost; });
-
       incomePerSec = baseIncome * multiplier;
     }
 
-    // Arayüz Yenileme
     function render() {
       document.getElementById('balance-display').innerText = '$' + Math.floor(balance).toLocaleString('en-US');
       document.getElementById('income-display').innerText = '+$' + Math.floor(incomePerSec).toLocaleString('en-US') + '/sn';
       document.getElementById('debt-display').innerText = '$' + Math.floor(debt).toLocaleString('en-US');
+      document.getElementById('prestige-display').innerText = prestigeMultiplier.toFixed(1) + 'x';
       document.getElementById('player-rank').innerText = getRank(balance);
       document.getElementById('loan-info').innerText = 'Max Kredi Limiti: $' + Math.floor(maxLoan).toLocaleString('en-US');
 
@@ -255,46 +257,46 @@
       bizContainer.innerHTML = '';
       businesses.forEach((biz, index) => {
         const cost = Math.floor(biz.baseCost * Math.pow(1.15, biz.count));
+        const upCost = Math.floor(cost * 5);
         bizContainer.innerHTML += `
           <div class="card">
-            <div class="card-head"><span class="card-title">${biz.name}</span><span class="card-count">x${biz.count}</span></div>
-            <div class="card-info">Birim Gelir: +$${biz.income}/sn<br>Maliyet: $${cost.toLocaleString('en-US')}</div>
+            <div class="card-head"><span class="card-title">${biz.name} (Lvl ${biz.level})</span><span class="card-count">x${biz.count}</span></div>
+            <div class="card-info">Saniyelik Getiri: +$${(biz.income * biz.level).toLocaleString('en-US')}/sn<br>Satın Al: $${cost.toLocaleString('en-US')}</div>
             <button class="btn" ${balance < cost ? 'disabled' : ''} onclick="buyBusiness(${index})">YATIRIM YAP</button>
+            <button class="btn btn-blue" style="margin-top:5px;" ${balance < upCost ? 'disabled' : ''} onclick="upgradeBusiness(${index})">SEVİYE YÜKSELT ($${upCost.toLocaleString('en-US')})</button>
           </div>
         `;
       });
 
-      // Yöneticiler Sekmesi
+      // Yöneticiler
       const execContainer = document.getElementById('tab-executives');
       execContainer.innerHTML = '';
       executives.forEach((exec, index) => {
         execContainer.innerHTML += `
           <div class="card">
             <div class="card-head"><span class="card-title">${exec.name}</span><span class="card-count">${exec.hired ? 'BÜNYEMİZDE' : 'BOŞTA'}</span></div>
-            <div class="card-info">${exec.desc}<br>Transfer Ücreti: $${exec.cost.toLocaleString('en-US')}</div>
-            <button class="btn" ${exec.hired || balance < exec.cost ? 'disabled' : ''} onclick="hireExec(${index})">
-              ${exec.hired ? 'İŞE ALINDI' : 'TRANSFER ET'}
-            </button>
+            <div class="card-info">${exec.desc}<br>Maliyet: $${exec.cost.toLocaleString('en-US')}</div>
+            <button class="btn" ${exec.hired || balance < exec.cost ? 'disabled' : ''} onclick="hireExec(${index})">${exec.hired ? 'İŞE ALINDI' : 'TRANSFER ET'}</button>
           </div>
         `;
       });
 
-      // Karaborsa Sekmesi
-      const invContainer = document.getElementById('tab-investments');
-      invContainer.innerHTML = '';
-      investments.forEach((inv, index) => {
-        const cost = Math.floor(inv.cost * Math.pow(1.2, inv.count));
-        invContainer.innerHTML += `
+      // Borsa
+      const stockContainer = document.getElementById('tab-stocks');
+      stockContainer.innerHTML = '';
+      stocks.forEach((st, index) => {
+        stockContainer.innerHTML += `
           <div class="card">
-            <div class="card-head"><span class="card-title">${inv.name}</span><span class="card-count">x${inv.count}</span></div>
-            <div class="card-info">Saniyelik Getiri: +$${inv.income.toLocaleString('en-US')}<br>Fiyat: $${cost.toLocaleString('en-US')}</div>
-            <button class="btn" ${balance < cost ? 'disabled' : ''} onclick="buyInvestment(${index})">VARLIĞI SATIN AL</button>
+            <div class="card-head"><span class="card-title">${st.name}</span><span class="card-count">${st.shares} Adet</span></div>
+            <div class="card-info">Anlık Hisse Fiyatı: $${Math.floor(st.price).toLocaleString('en-US')}</div>
+            <button class="btn" ${balance < st.price ? 'disabled' : ''} onclick="buyStock(${index})">1 ADET HİSSE AL</button>
+            <button class="btn btn-red" style="margin-top:5px;" ${st.shares <= 0 ? 'disabled' : ''} onclick="sellStock(${index})">1 ADET HİSSE SAT</button>
           </div>
         `;
       });
     }
 
-    // Satın Almalar
+    // Şirket Alım & Yükseltme
     function buyBusiness(i) {
       const biz = businesses[i];
       const cost = Math.floor(biz.baseCost * Math.pow(1.15, biz.count));
@@ -302,6 +304,18 @@
         playSound(600, 0.1);
         balance -= cost;
         biz.count++;
+        calculateIncome();
+        render();
+      }
+    }
+
+    function upgradeBusiness(i) {
+      const biz = businesses[i];
+      const cost = Math.floor(biz.baseCost * Math.pow(1.15, biz.count)) * 5;
+      if (balance >= cost) {
+        playSound(900, 0.15);
+        balance -= cost;
+        biz.level++;
         calculateIncome();
         render();
       }
@@ -318,34 +332,82 @@
       }
     }
 
-    function buyInvestment(i) {
-      const inv = investments[i];
-      const cost = Math.floor(inv.cost * Math.pow(1.2, inv.count));
-      if (balance >= cost) {
-        playSound(500, 0.1);
-        balance -= cost;
-        inv.count++;
-        calculateIncome();
+    // Borsa Alım/Satım
+    function buyStock(i) {
+      const st = stocks[i];
+      if (balance >= st.price) {
+        playSound(550, 0.08);
+        balance -= st.price;
+        st.shares++;
         render();
       }
     }
 
-    // Banka İşlemleri
+    function sellStock(i) {
+      const st = stocks[i];
+      if (st.shares > 0) {
+        playSound(750, 0.08);
+        balance += st.price;
+        st.shares--;
+        render();
+      }
+    }
+
+    // Banka & Borç Ödeme
     function takeLoan() {
       if (debt === 0) {
         playSound(300, 0.2, "square");
         balance += 25000;
-        debt = 30000; // Faizli geri ödeme
+        debt = 30000;
         render();
       }
     }
 
-    function payLoan() {
-      if (balance >= debt && debt > 0) {
-        playSound(700, 0.15);
-        balance -= debt;
-        debt = 0;
+    // İSTEDİĞİN ÖZEL DÜZELTME: TÜM BORCU ÖDER
+    function payAllLoan() {
+      if (debt > 0) {
+        if (balance >= debt) {
+          playSound(700, 0.15);
+          balance -= debt;
+          debt = 0;
+          render();
+        } else {
+          document.getElementById('news-ticker').innerText = "• UYARI: Kasadaki nakit paranız tüm borcu kapatmaya yetmiyor!";
+          playSound(150, 0.3, "sawtooth");
+        }
+      }
+    }
+
+    // Casino
+    function playRoulette(amount) {
+      if (balance >= amount) {
+        balance -= amount;
+        if (Math.random() > 0.5) {
+          playSound(1000, 0.2);
+          balance += amount * 2;
+          document.getElementById('news-ticker').innerText = "• KAZANDINIZ! Casino ruletinde $" + (amount * 2).toLocaleString() + " kazanç sağladınız!";
+        } else {
+          playSound(200, 0.2, "sawtooth");
+          document.getElementById('news-ticker').innerText = "• KAYBETTİNİZ! Casino ruletinde $" + amount.toLocaleString() + " kaybettiniz.";
+        }
         render();
+      }
+    }
+
+    // Prestij (Rebirth)
+    function doPrestige() {
+      if (balance >= 5000000) {
+        playSound(1200, 0.4);
+        prestigeMultiplier += 1.5;
+        balance = 10000;
+        debt = 0;
+        businesses.forEach(b => { b.count = 0; b.level = 1; });
+        executives.forEach(e => { e.hired = false; });
+        calculateIncome();
+        render();
+        document.getElementById('news-ticker').innerText = "• REBIRTH TAMAMLANDI! Holding devredildi, kalıcı gelir çarpanınız " + prestigeMultiplier.toFixed(1) + "x oldu!";
+      } else {
+        document.getElementById('news-ticker').innerText = "• Prestij yapmak için en az $5,000,000 net servete sahip olmalısınız!";
       }
     }
 
@@ -354,7 +416,12 @@
       balance += incomePerSec;
       maxLoan = Math.max(50000, balance * 2);
 
-      // Grafiği Güncelle
+      // Hisse Fiyatlarını Rastgele Dalgalandır
+      stocks.forEach(st => {
+        const change = (Math.random() - 0.48) * 10;
+        st.price = Math.max(10, st.price + change);
+      });
+
       chartData.shift();
       chartData.push(balance);
       marketChart.update();
@@ -362,11 +429,10 @@
       render();
     }, 1000);
 
-    // Borsa Şok Olayları
+    // Rastgele Piyasa Haberleri
     const events = [
-      { text: "• YAZILIM KRİZİ: AI şirketleri değer kaybetti!", effect: () => balance *= 0.95 },
-      { text: "• KRİPTO BOĞA SEZONU: Tüm kasaya %10 nakit girdi!", effect: () => balance *= 1.10 },
-      { text: "• HÜKÜMET TEŞVİK HİBESİ: Bankanıza $50,000 yatırıldı!", effect: () => balance += 50000 }
+      { text: "• YAZILIM SEKTÖRÜ PATLADI: AI Şirketlerinin hisseleri tavan yaptı!", effect: () => balance *= 1.05 },
+      { text: "• MERKEZ BANKASI FAİZ ARTIRDI: Şirket harcamaları arttı.", effect: () => balance *= 0.98 }
     ];
 
     setInterval(() => {
@@ -374,12 +440,10 @@
         const ev = events[Math.floor(Math.random() * events.length)];
         document.getElementById('news-ticker').innerText = ev.text;
         ev.effect();
-        playSound(200, 0.3, "sawtooth");
         render();
       }
-    }, 15000);
+    }, 18000);
 
-    // Başlat
     calculateIncome();
     render();
   </script>
