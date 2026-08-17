@@ -39,7 +39,7 @@
     .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin: 12px 0; }
     .main-vault { background: linear-gradient(135deg, #12121c 0%, #08080d 100%); border: 1px solid var(--border); border-radius: 6px; padding: 18px; }
     .vault-title { font-size: 0.65rem; color: var(--gray); letter-spacing: 2px; text-transform: uppercase; }
-    .vault-amount { font-size: 2.3rem; font-family: monospace; color: var(--gold-bright); text-shadow: 0 0 15px rgba(212, 175, 55, 0.2); margin: 6px 0; }
+    .vault-amount { font-size: 2.3rem; font-family: monospace; color: var(--gold-bright); text-shadow: 0 0 15px rgba(212, 175, 55, 0.2); margin: 6px 0; word-break: break-all; }
     .vault-stats { display: flex; gap: 15px; font-family: monospace; font-size: 0.75rem; flex-wrap: wrap; }
     .stat-green { color: var(--green); }
     .stat-red { color: var(--red); }
@@ -104,7 +104,7 @@
   <div class="dashboard-grid">
     <div class="main-vault">
       <div class="vault-title">NET SERVET / KASA</div>
-      <div class="vault-amount" id="balance-display">$10,00000000000000000000</div>
+      <div class="vault-amount" id="balance-display">$10,000,000,000,000,000,000,000,000</div>
       <div class="vault-stats">
         <div>GELİR: <span class="stat-green" id="income-display">+$0/sn</span></div>
         <div>BORÇ: <span class="stat-red" id="debt-display">$0</span></div>
@@ -163,6 +163,8 @@
   </footer>
 
   <script>
+    const INITIAL_BALANCE = 10000000000000000000000000; // 10 Septilyon Dolar
+
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(freq, duration, type="sine") {
       try {
@@ -210,7 +212,7 @@
     ];
 
     let gameState = {
-      balance: 1000000000000000000000,
+      balance: INITIAL_BALANCE,
       debt: 0,
       prestigeMultiplier: 1.0,
       businesses: JSON.parse(JSON.stringify(defaultBusinesses)),
@@ -222,7 +224,7 @@
     let maxLoan = 50000;
 
     const ctx = document.getElementById('marketChart').getContext('2d');
-    const chartData = Array(10).fill(10000);
+    const chartData = Array(10).fill(INITIAL_BALANCE);
     const marketChart = new Chart(ctx, {
       type: 'line',
       data: {
@@ -487,7 +489,7 @@
       if (gameState.balance >= 5000000) {
         playSound(1200, 0.4);
         gameState.prestigeMultiplier += 1.5;
-        gameState.balance = 10000;
+        gameState.balance = INITIAL_BALANCE;
         gameState.debt = 0;
         gameState.businesses.forEach(b => { b.count = 0; b.level = 1; });
         gameState.executives.forEach(e => { e.hired = false; });
