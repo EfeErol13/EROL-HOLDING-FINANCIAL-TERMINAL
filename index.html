@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EROL HOLDING - FINANCIAL TERMINAL v4.0</title>
+  <title>EROL HOLDING - FINANCIAL TERMINAL v4.1</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -22,7 +22,6 @@
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     body { background-color: var(--bg); color: var(--white); padding: 15px; min-height: 100vh; overflow-x: hidden; }
 
-    /* Auth Overlay (Üyelik Ekranı) */
     .auth-overlay { position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(5,5,8,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; backdrop-filter: blur(8px); }
     .auth-card { background: var(--panel); border: 1px solid var(--gold); border-radius: 8px; padding: 25px; width: 340px; box-shadow: 0 0 25px rgba(212,175,55,0.2); }
     .auth-title { color: var(--gold); font-size: 1.1rem; font-weight: bold; text-align: center; margin-bottom: 15px; letter-spacing: 2px; }
@@ -30,13 +29,12 @@
     .auth-input:focus { border-color: var(--gold); outline: none; }
     .auth-error { color: var(--red); font-size: 0.7rem; font-family: monospace; margin-bottom: 10px; text-align: center; min-height: 15px; }
 
-    /* Main Interface */
     header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
     .brand { font-size: 0.95rem; letter-spacing: 2.5px; font-weight: 700; color: var(--gold); display: flex; align-items: center; gap: 8px; }
     .pulse-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green); animation: pulse 1.5s infinite; }
     @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
-    .user-info-badge { display: flex; align-items: center; gap: 10px; }
-    .rank-badge { background: rgba(212, 175, 55, 0.1); border: 1px solid var(--gold); color: var(--gold-bright); padding: 4px 10px; border-radius: 4px; font-family: monospace; font-size: 0.75rem; }
+    .user-info-badge { display: flex; align-items: center; gap: 8px; }
+    .rank-badge { background: rgba(212, 175, 55, 0.1); border: 1px solid var(--gold); color: var(--gold-bright); padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 0.7rem; }
 
     .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin: 12px 0; }
     .main-vault { background: linear-gradient(135deg, #12121c 0%, #08080d 100%); border: 1px solid var(--border); border-radius: 6px; padding: 18px; }
@@ -80,7 +78,7 @@
 </head>
 <body>
 
-  <!-- Üyelik / Giriş Paneli Modalı -->
+  <!-- Üyelik Paneli -->
   <div class="auth-overlay" id="authModal">
     <div class="auth-card">
       <div class="auth-title">EROL HOLDING ACCESS</div>
@@ -95,7 +93,7 @@
   <header>
     <div class="brand">
       <div class="pulse-dot"></div>
-      EROL HOLDING FINANCIAL TERMINAL v4.0
+      EROL HOLDING FINANCIAL TERMINAL v4.1
     </div>
     <div class="user-info-badge">
       <span style="font-family:monospace; font-size:0.75rem; color:var(--gray);" id="currentUserDisplay">Giriş Yapılmadı</span>
@@ -127,8 +125,9 @@
     <canvas id="marketChart"></canvas>
   </div>
 
+  <!-- Borsa Haber Bandı -->
   <div class="ticker-tape" id="news-ticker">
-    • Oturum bekleniyor... Siteme giriş yaptığınızda verileriniz yüklenecektir.
+    • Piyasa Açıldı: Canlı Veri Akışı Bekleniyor...
   </div>
 
   <div class="tabs">
@@ -169,7 +168,7 @@
 
   <footer>
     <div>SECURE DATABASE SYSTEM</div>
-    <div>ULTIMATE FINANCIAL CORE v4.0</div>
+    <div>ULTIMATE FINANCIAL CORE v4.1</div>
   </footer>
 
   <script>
@@ -190,10 +189,8 @@
       } catch(e) {}
     }
 
-    // Aktif Kullanıcı Verisi
     let currentUser = null;
 
-    // Şirketler (Yeni eklenenlerle)
     const defaultBusinesses = [
       { id: 'coffee', name: 'Lüks Kahve Zinciri', baseCost: 150, income: 10, count: 0, level: 1 },
       { id: 'perfume', name: 'Niş Parfüm Evi', baseCost: 1500, income: 90, count: 0, level: 1 },
@@ -234,7 +231,6 @@
     let incomePerSec = 0;
     let maxLoan = 50000;
 
-    // Chart.js
     const ctx = document.getElementById('marketChart').getContext('2d');
     const chartData = Array(10).fill(10000);
     const marketChart = new Chart(ctx, {
@@ -260,7 +256,6 @@
       }
     });
 
-    // Oturum & Kayıt Yönetimi
     function registerUser() {
       const u = document.getElementById('usernameInput').value.trim();
       const p = document.getElementById('passwordInput').value.trim();
@@ -298,6 +293,10 @@
       localStorage.setItem('erol_holding_active_user', username);
       document.getElementById('authModal').style.display = 'none';
       document.getElementById('currentUserDisplay').innerText = '@' + username;
+      
+      // FIX: Giriş yapıldığı an haberi yenile
+      document.getElementById('news-ticker').innerText = "• Hoş geldiniz @" + username + "! Piyasa verileri senkronize edildi.";
+      
       calculateIncome();
       render();
     }
@@ -317,7 +316,6 @@
       }
     }
 
-    // Sekmeler
     function switchTab(tabId) {
       playSound(400, 0.05);
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -349,7 +347,6 @@
       document.getElementById('player-rank').innerText = getRank(gameState.balance);
       document.getElementById('loan-info').innerText = 'Max Kredi Limiti: $' + Math.floor(maxLoan).toLocaleString('en-US');
 
-      // Şirketler
       const bizContainer = document.getElementById('tab-businesses');
       bizContainer.innerHTML = '';
       gameState.businesses.forEach((biz, index) => {
@@ -365,7 +362,6 @@
         `;
       });
 
-      // Yöneticiler
       const execContainer = document.getElementById('tab-executives');
       execContainer.innerHTML = '';
       gameState.executives.forEach((exec, index) => {
@@ -378,7 +374,6 @@
         `;
       });
 
-      // Borsa
       const stockContainer = document.getElementById('tab-stocks');
       stockContainer.innerHTML = '';
       gameState.stocks.forEach((st, index) => {
@@ -393,7 +388,6 @@
       });
     }
 
-    // İşlemler
     function buyBusiness(i) {
       const biz = gameState.businesses[i];
       const cost = Math.floor(biz.baseCost * Math.pow(1.15, biz.count));
@@ -512,7 +506,13 @@
       }
     }
 
-    // Oyun Döngüsü
+    // Haber akışı döngüsü
+    const randomNews = [
+      "• TEKNOLOJİ RALLİSİ: Borsa şirketleri değer kazanıyor!",
+      "• FLÜKTÜASYON: Kripto piyasasında sert hareketler izleniyor.",
+      "• YATIRIM BANKACILIĞI: Küresel faiz kararları holding gelirlerini etkiliyor."
+    ];
+
     setInterval(() => {
       if (!currentUser) return;
 
@@ -532,7 +532,14 @@
       saveGame();
     }, 1000);
 
-    // Otomatik Giriş Kontrolü
+    // Rastgele haber değişimi
+    setInterval(() => {
+      if (currentUser && Math.random() > 0.5) {
+        const news = randomNews[Math.floor(Math.random() * randomNews.length)];
+        document.getElementById('news-ticker').innerText = news;
+      }
+    }, 12000);
+
     window.onload = () => {
       const active = localStorage.getItem('erol_holding_active_user');
       if (active) {
