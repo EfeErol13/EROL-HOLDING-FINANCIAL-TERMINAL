@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EROL HOLDING - FINANCIAL TERMINAL v4.1</title>
+  <title>EROL HOLDING - FINANCIAL TERMINAL v4.2</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -93,7 +93,7 @@
   <header>
     <div class="brand">
       <div class="pulse-dot"></div>
-      EROL HOLDING FINANCIAL TERMINAL v4.1
+      EROL HOLDING FINANCIAL TERMINAL v4.2
     </div>
     <div class="user-info-badge">
       <span style="font-family:monospace; font-size:0.75rem; color:var(--gray);" id="currentUserDisplay">Giriş Yapılmadı</span>
@@ -127,7 +127,7 @@
 
   <!-- Borsa Haber Bandı -->
   <div class="ticker-tape" id="news-ticker">
-    • Piyasa Açıldı: Canlı Veri Akışı Bekleniyor...
+    • Oturum bekleniyor... Sisteme giriş yaptığınızda verileriniz yüklenecektir.
   </div>
 
   <div class="tabs">
@@ -168,11 +168,10 @@
 
   <footer>
     <div>SECURE DATABASE SYSTEM</div>
-    <div>ULTIMATE FINANCIAL CORE v4.1</div>
+    <div>ULTIMATE FINANCIAL CORE v4.2</div>
   </footer>
 
   <script>
-    // Audio Synthesizer
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(freq, duration, type="sine") {
       try {
@@ -294,11 +293,16 @@
       document.getElementById('authModal').style.display = 'none';
       document.getElementById('currentUserDisplay').innerText = '@' + username;
       
-      // FIX: Giriş yapıldığı an haberi yenile
-      document.getElementById('news-ticker').innerText = "• Hoş geldiniz @" + username + "! Piyasa verileri senkronize edildi.";
+      // KESİN ÇÖZÜM: Giriş yapıldığı an borsa yazısını zorla değiştiriyoruz
+      updateNewsTape("• Hoş geldiniz @" + username + "! Canlı borsa verileri senkronize edildi.");
       
       calculateIncome();
       render();
+    }
+
+    function updateNewsTape(msg) {
+      const ticker = document.getElementById('news-ticker');
+      if (ticker) ticker.innerText = msg;
     }
 
     function logout() {
@@ -467,7 +471,7 @@
           render();
           saveGame();
         } else {
-          document.getElementById('news-ticker').innerText = "• UYARI: Kasadaki nakit paranız tüm borcu kapatmaya yetmiyor!";
+          updateNewsTape("• UYARI: Kasadaki nakit paranız tüm borcu kapatmaya yetmiyor!");
           playSound(150, 0.3, "sawtooth");
         }
       }
@@ -479,10 +483,10 @@
         if (Math.random() > 0.5) {
           playSound(1000, 0.2);
           gameState.balance += amount * 2;
-          document.getElementById('news-ticker').innerText = "• KAZANDINIZ! Casino ruletinde $" + (amount * 2).toLocaleString() + " kazanç sağladınız!";
+          updateNewsTape("• KAZANDINIZ! Casino ruletinde $" + (amount * 2).toLocaleString() + " kazanç sağladınız!");
         } else {
           playSound(200, 0.2, "sawtooth");
-          document.getElementById('news-ticker').innerText = "• KAYBETTİNİZ! Casino ruletinde $" + amount.toLocaleString() + " kaybettiniz.";
+          updateNewsTape("• KAYBETTİNİZ! Casino ruletinde $" + amount.toLocaleString() + " kaybettiniz.");
         }
         render();
         saveGame();
@@ -500,19 +504,20 @@
         calculateIncome();
         render();
         saveGame();
-        document.getElementById('news-ticker').innerText = "• REBIRTH TAMAMLANDI! Holding devredildi, kalıcı gelir çarpanınız " + gameState.prestigeMultiplier.toFixed(1) + "x oldu!";
+        updateNewsTape("• REBIRTH TAMAMLANDI! Kalıcı gelir çarpanınız " + gameState.prestigeMultiplier.toFixed(1) + "x oldu!");
       } else {
-        document.getElementById('news-ticker').innerText = "• Prestij yapmak için en az $5,000,000 net servete sahip olmalısınız!";
+        updateNewsTape("• Prestij yapmak için en az $5,000,000 net servete sahip olmalısınız!");
       }
     }
 
-    // Haber akışı döngüsü
     const randomNews = [
-      "• TEKNOLOJİ RALLİSİ: Borsa şirketleri değer kazanıyor!",
-      "• FLÜKTÜASYON: Kripto piyasasında sert hareketler izleniyor.",
-      "• YATIRIM BANKACILIĞI: Küresel faiz kararları holding gelirlerini etkiliyor."
+      "• TEKNOLOJİ RALLİSİ: Borsa şirketleri değer kazanmaya devam ediyor!",
+      "• KRİPTO PİYASASI: Sektördeki olumlu hava holding yatırımlarını tetikliyor.",
+      "• MERKEZ BANKASI: Faiz kararları borsa endekslerinde haraketlilik yarattı.",
+      "• BÜYÜME RAPORU: Erol Holding yatırımları rekor getiri oranlarına ulaştı."
     ];
 
+    // Saniyelik döngü
     setInterval(() => {
       if (!currentUser) return;
 
@@ -532,13 +537,13 @@
       saveGame();
     }, 1000);
 
-    // Rastgele haber değişimi
+    // Otomatik haber değişimi döngüsü
     setInterval(() => {
-      if (currentUser && Math.random() > 0.5) {
+      if (currentUser) {
         const news = randomNews[Math.floor(Math.random() * randomNews.length)];
-        document.getElementById('news-ticker').innerText = news;
+        updateNewsTape(news);
       }
-    }, 12000);
+    }, 8000);
 
     window.onload = () => {
       const active = localStorage.getItem('erol_holding_active_user');
