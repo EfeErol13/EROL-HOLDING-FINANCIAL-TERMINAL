@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EROL HOLDING - FINANCIAL TERMINAL v4.2</title>
+  <title>EROL HOLDING - FINANCIAL TERMINAL v4.3</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -78,7 +78,6 @@
 </head>
 <body>
 
-  <!-- Üyelik Paneli -->
   <div class="auth-overlay" id="authModal">
     <div class="auth-card">
       <div class="auth-title">EROL HOLDING ACCESS</div>
@@ -93,7 +92,7 @@
   <header>
     <div class="brand">
       <div class="pulse-dot"></div>
-      EROL HOLDING FINANCIAL TERMINAL v4.2
+      EROL HOLDING FINANCIAL TERMINAL v4.3
     </div>
     <div class="user-info-badge">
       <span style="font-family:monospace; font-size:0.75rem; color:var(--gray);" id="currentUserDisplay">Giriş Yapılmadı</span>
@@ -125,7 +124,6 @@
     <canvas id="marketChart"></canvas>
   </div>
 
-  <!-- Borsa Haber Bandı -->
   <div class="ticker-tape" id="news-ticker">
     • Oturum bekleniyor... Sisteme giriş yaptığınızda verileriniz yüklenecektir.
   </div>
@@ -138,16 +136,10 @@
     <button class="tab-btn" onclick="switchTab('prestige')">PRESTİJ & REBIRTH</button>
   </div>
 
-  <!-- Şirketler -->
   <div class="tab-content active" id="tab-businesses"></div>
-
-  <!-- Yöneticiler -->
   <div class="tab-content" id="tab-executives"></div>
-
-  <!-- Borsa Hisseleri -->
   <div class="tab-content" id="tab-stocks"></div>
 
-  <!-- Casino -->
   <div class="tab-content" id="tab-casino">
     <div class="card">
       <div class="card-head"><span class="card-title">VIP Kırmızı / Siyah Rulet</span></div>
@@ -157,7 +149,6 @@
     </div>
   </div>
 
-  <!-- Prestij -->
   <div class="tab-content" id="tab-prestige">
     <div class="card">
       <div class="card-head"><span class="card-title">Holding Satış & Rebirth</span></div>
@@ -168,7 +159,7 @@
 
   <footer>
     <div>SECURE DATABASE SYSTEM</div>
-    <div>ULTIMATE FINANCIAL CORE v4.2</div>
+    <div>ULTIMATE FINANCIAL CORE v4.3</div>
   </footer>
 
   <script>
@@ -210,12 +201,12 @@
     ];
 
     const defaultStocks = [
+      { id: 'erol', name: 'ERL_H - Erol Holding Corp.', price: 100, shares: 0, isHolding: true },
       { id: 'tesla', name: 'TSLA - Elektrikli Araç', price: 200, shares: 0 },
       { id: 'nvidia', name: 'NVDA - Yapay Zeka Çipi', price: 500, shares: 0 },
       { id: 'apple', name: 'AAPL - Teknoloji Devi', price: 180, shares: 0 },
       { id: 'amazon', name: 'AMZN - E-Ticaret Lideri', price: 175, shares: 0 },
-      { id: 'google', name: 'GOOGL - Arama & AI', price: 160, shares: 0 },
-      { id: 'erol', name: 'ERL_H - Erol Holding Corp.', price: 1000, shares: 0 }
+      { id: 'google', name: 'GOOGL - Arama & AI', price: 160, shares: 0 }
     ];
 
     let gameState = {
@@ -293,7 +284,6 @@
       document.getElementById('authModal').style.display = 'none';
       document.getElementById('currentUserDisplay').innerText = '@' + username;
       
-      // KESİN ÇÖZÜM: Giriş yapıldığı an borsa yazısını zorla değiştiriyoruz
       updateNewsTape("• Hoş geldiniz @" + username + "! Canlı borsa verileri senkronize edildi.");
       
       calculateIncome();
@@ -384,7 +374,7 @@
         stockContainer.innerHTML += `
           <div class="card">
             <div class="card-head"><span class="card-title">${st.name}</span><span class="card-count">${st.shares} Adet</span></div>
-            <div class="card-info">Anlık Hisse Fiyatı: $${Math.floor(st.price).toLocaleString('en-US')}</div>
+            <div class="card-info">Anlık Hisse Fiyatı: $${Math.floor(st.price).toLocaleString('en-US')} ${st.isHolding ? '<br><span style="color:var(--gold);">(Holding Gücüne Bağlı)</span>' : ''}</div>
             <button class="btn" ${gameState.balance < st.price ? 'disabled' : ''} onclick="buyStock(${index})">1 ADET HİSSE AL</button>
             <button class="btn btn-red" style="margin-top:5px;" ${st.shares <= 0 ? 'disabled' : ''} onclick="sellStock(${index})">1 ADET HİSSE SAT</button>
           </div>
@@ -517,16 +507,23 @@
       "• BÜYÜME RAPORU: Erol Holding yatırımları rekor getiri oranlarına ulaştı."
     ];
 
-    // Saniyelik döngü
     setInterval(() => {
       if (!currentUser) return;
 
       gameState.balance += incomePerSec;
       maxLoan = Math.max(50000, gameState.balance * 2);
 
+      // Hisse Fiyatı Hesaplama
       gameState.stocks.forEach(st => {
-        const change = (Math.random() - 0.48) * 12;
-        st.price = Math.max(10, st.price + change);
+        if (st.isHolding) {
+          // EROL HOLDING HİSSESİ: Net Servet + Saniyelik Gelir bağlamı
+          const calculatedPrice = 100 + (gameState.balance * 0.01) + (incomePerSec * 0.5);
+          st.price = Math.max(100, calculatedPrice);
+        } else {
+          // Diğer Hisseler: Rastgele Piyasa Dalgalanması
+          const change = (Math.random() - 0.48) * 12;
+          st.price = Math.max(10, st.price + change);
+        }
       });
 
       chartData.shift();
@@ -537,7 +534,6 @@
       saveGame();
     }, 1000);
 
-    // Otomatik haber değişimi döngüsü
     setInterval(() => {
       if (currentUser) {
         const news = randomNews[Math.floor(Math.random() * randomNews.length)];
