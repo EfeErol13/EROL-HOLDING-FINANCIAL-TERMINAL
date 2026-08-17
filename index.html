@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EROL HOLDING - ULTIMATE FINANCIAL TERMINAL v3.0</title>
+  <title>EROL HOLDING - FINANCIAL TERMINAL v4.0</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -22,10 +22,20 @@
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     body { background-color: var(--bg); color: var(--white); padding: 15px; min-height: 100vh; overflow-x: hidden; }
 
+    /* Auth Overlay (Üyelik Ekranı) */
+    .auth-overlay { position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(5,5,8,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; backdrop-filter: blur(8px); }
+    .auth-card { background: var(--panel); border: 1px solid var(--gold); border-radius: 8px; padding: 25px; width: 340px; box-shadow: 0 0 25px rgba(212,175,55,0.2); }
+    .auth-title { color: var(--gold); font-size: 1.1rem; font-weight: bold; text-align: center; margin-bottom: 15px; letter-spacing: 2px; }
+    .auth-input { width: 100%; background: #000; border: 1px solid var(--border); color: #fff; padding: 10px; margin-bottom: 10px; border-radius: 4px; font-family: monospace; font-size: 0.85rem; }
+    .auth-input:focus { border-color: var(--gold); outline: none; }
+    .auth-error { color: var(--red); font-size: 0.7rem; font-family: monospace; margin-bottom: 10px; text-align: center; min-height: 15px; }
+
+    /* Main Interface */
     header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
     .brand { font-size: 0.95rem; letter-spacing: 2.5px; font-weight: 700; color: var(--gold); display: flex; align-items: center; gap: 8px; }
     .pulse-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green); animation: pulse 1.5s infinite; }
     @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
+    .user-info-badge { display: flex; align-items: center; gap: 10px; }
     .rank-badge { background: rgba(212, 175, 55, 0.1); border: 1px solid var(--gold); color: var(--gold-bright); padding: 4px 10px; border-radius: 4px; font-family: monospace; font-size: 0.75rem; }
 
     .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin: 12px 0; }
@@ -70,12 +80,28 @@
 </head>
 <body>
 
+  <!-- Üyelik / Giriş Paneli Modalı -->
+  <div class="auth-overlay" id="authModal">
+    <div class="auth-card">
+      <div class="auth-title">EROL HOLDING ACCESS</div>
+      <div class="auth-error" id="authError"></div>
+      <input type="text" id="usernameInput" class="auth-input" placeholder="Kullanıcı Adı" autocomplete="off">
+      <input type="password" id="passwordInput" class="auth-input" placeholder="Şifre (3-10 Karakter)">
+      <button class="btn" onclick="loginUser()">GİRİŞ YAP</button>
+      <button class="btn btn-blue" style="margin-top:8px;" onclick="registerUser()">YENİ HESAP OLUŞTUR</button>
+    </div>
+  </div>
+
   <header>
     <div class="brand">
       <div class="pulse-dot"></div>
-      EROL HOLDING FINANCIAL TERMINAL v3.0
+      EROL HOLDING FINANCIAL TERMINAL v4.0
     </div>
-    <div class="rank-badge" id="player-rank">STAJYER YATIRIMCI</div>
+    <div class="user-info-badge">
+      <span style="font-family:monospace; font-size:0.75rem; color:var(--gray);" id="currentUserDisplay">Giriş Yapılmadı</span>
+      <div class="rank-badge" id="player-rank">STAJYER</div>
+      <button class="btn btn-red" style="padding:2px 6px; font-size:0.6rem; width:auto;" onclick="logout()">ÇIKIŞ</button>
+    </div>
   </header>
 
   <div class="dashboard-grid">
@@ -85,7 +111,7 @@
       <div class="vault-stats">
         <div>GELİR: <span class="stat-green" id="income-display">+$0/sn</span></div>
         <div>BORÇ: <span class="stat-red" id="debt-display">$0</span></div>
-        <div>PRESTİJ ÇARPAN: <span class="stat-blue" id="prestige-display">1.0x</span></div>
+        <div>PRESTİJ: <span class="stat-blue" id="prestige-display">1.0x</span></div>
       </div>
     </div>
 
@@ -102,7 +128,7 @@
   </div>
 
   <div class="ticker-tape" id="news-ticker">
-    • Piyasa açık. Tüm küresel finansal veri akışı canlı işleniyor...
+    • Oturum bekleniyor... Siteme giriş yaptığınızda verileriniz yüklenecektir.
   </div>
 
   <div class="tabs">
@@ -142,8 +168,8 @@
   </div>
 
   <footer>
-    <div>SECURE ENCRYPTION: 2048-BIT SSL</div>
-    <div>ULTIMATE FINANCIAL CORE v3.0</div>
+    <div>SECURE DATABASE SYSTEM</div>
+    <div>ULTIMATE FINANCIAL CORE v4.0</div>
   </footer>
 
   <script>
@@ -164,38 +190,51 @@
       } catch(e) {}
     }
 
-    // Oyun Verileri
-    let balance = 10000;
-    let debt = 0;
-    let maxLoan = 50000;
-    let incomePerSec = 0;
-    let prestigeMultiplier = 1.0;
+    // Aktif Kullanıcı Verisi
+    let currentUser = null;
 
-    // Şirketler
-    const businesses = [
+    // Şirketler (Yeni eklenenlerle)
+    const defaultBusinesses = [
       { id: 'coffee', name: 'Lüks Kahve Zinciri', baseCost: 150, income: 10, count: 0, level: 1 },
       { id: 'perfume', name: 'Niş Parfüm Evi', baseCost: 1500, income: 90, count: 0, level: 1 },
+      { id: 'agri', name: 'Dikey Tarım Girişimi', baseCost: 5000, income: 320, count: 0, level: 1 },
       { id: 'tech', name: 'Yazılım & AI Ajansı', baseCost: 15000, income: 800, count: 0, level: 1 },
+      { id: 'fleet', name: 'Otonom Araç Filosu', baseCost: 60000, income: 3100, count: 0, level: 1 },
       { id: 'crypto', name: 'Kripto Madencilik Tesisi', baseCost: 150000, income: 7500, count: 0, level: 1 },
       { id: 'bank', name: 'Özel Yatırım Bankası', baseCost: 2000000, income: 85000, count: 0, level: 1 },
-      { id: 'space', name: 'Uzay Roket Sanayii', baseCost: 25000000, income: 950000, count: 0, level: 1 }
+      { id: 'neural', name: 'Nöral İmplant Laboratuvarı', baseCost: 8000000, income: 340000, count: 0, level: 1 },
+      { id: 'space', name: 'Uzay Roket Sanayii', baseCost: 25000000, income: 950000, count: 0, level: 1 },
+      { id: 'fusion', name: 'Füzyon Enerji Santrali', baseCost: 100000000, income: 4200000, count: 0, level: 1 }
     ];
 
-    // Yöneticiler
-    const executives = [
+    const defaultExecutives = [
       { id: 'cfo', name: 'Finans Direktörü (CFO)', cost: 50000, boost: 1.25, hired: false, desc: 'Tüm gelirleri %25 artırır.' },
       { id: 'cto', name: 'Teknoloji Lideri (CTO)', cost: 300000, boost: 1.5, hired: false, desc: 'Tüm gelirleri %50 artırır.' },
       { id: 'lobby', name: 'Lobi Şirketi Başkanı', cost: 2500000, boost: 2.0, hired: false, desc: 'Tüm gelirleri 2 katına çıkarır.' }
     ];
 
-    // Canlı Borsa Hisseleri
-    const stocks = [
+    const defaultStocks = [
       { id: 'tesla', name: 'TSLA - Elektrikli Araç', price: 200, shares: 0 },
       { id: 'nvidia', name: 'NVDA - Yapay Zeka Çipi', price: 500, shares: 0 },
-      { id: 'apple', name: 'AAPL - Teknoloji Devi', price: 180, shares: 0 }
+      { id: 'apple', name: 'AAPL - Teknoloji Devi', price: 180, shares: 0 },
+      { id: 'amazon', name: 'AMZN - E-Ticaret Lideri', price: 175, shares: 0 },
+      { id: 'google', name: 'GOOGL - Arama & AI', price: 160, shares: 0 },
+      { id: 'erol', name: 'ERL_H - Erol Holding Corp.', price: 1000, shares: 0 }
     ];
 
-    // Chart.js Kurulumu
+    let gameState = {
+      balance: 10000,
+      debt: 0,
+      prestigeMultiplier: 1.0,
+      businesses: JSON.parse(JSON.stringify(defaultBusinesses)),
+      executives: JSON.parse(JSON.stringify(defaultExecutives)),
+      stocks: JSON.parse(JSON.stringify(defaultStocks))
+    };
+
+    let incomePerSec = 0;
+    let maxLoan = 50000;
+
+    // Chart.js
     const ctx = document.getElementById('marketChart').getContext('2d');
     const chartData = Array(10).fill(10000);
     const marketChart = new Chart(ctx, {
@@ -221,6 +260,64 @@
       }
     });
 
+    // Oturum & Kayıt Yönetimi
+    function registerUser() {
+      const u = document.getElementById('usernameInput').value.trim();
+      const p = document.getElementById('passwordInput').value.trim();
+      const err = document.getElementById('authError');
+
+      if (!u || !p) { err.innerText = "Lütfen tüm alanları doldurun."; return; }
+      if (p.length < 3 || p.length > 10) { err.innerText = "Şifre 3 ile 10 karakter arasında olmalıdır."; return; }
+
+      let users = JSON.parse(localStorage.getItem('erol_holding_users') || '{}');
+      if (users[u]) { err.innerText = "Bu kullanıcı adı zaten alınmış!"; return; }
+
+      users[u] = { password: p, state: gameState };
+      localStorage.setItem('erol_holding_users', JSON.stringify(users));
+      
+      loginUserSuccess(u);
+    }
+
+    function loginUser() {
+      const u = document.getElementById('usernameInput').value.trim();
+      const p = document.getElementById('passwordInput').value.trim();
+      const err = document.getElementById('authError');
+
+      let users = JSON.parse(localStorage.getItem('erol_holding_users') || '{}');
+      if (!users[u] || users[u].password !== p) {
+        err.innerText = "Hatalı kullanıcı adı veya şifre!";
+        return;
+      }
+
+      gameState = users[u].state;
+      loginUserSuccess(u);
+    }
+
+    function loginUserSuccess(username) {
+      currentUser = username;
+      localStorage.setItem('erol_holding_active_user', username);
+      document.getElementById('authModal').style.display = 'none';
+      document.getElementById('currentUserDisplay').innerText = '@' + username;
+      calculateIncome();
+      render();
+    }
+
+    function logout() {
+      saveGame();
+      localStorage.removeItem('erol_holding_active_user');
+      location.reload();
+    }
+
+    function saveGame() {
+      if (!currentUser) return;
+      let users = JSON.parse(localStorage.getItem('erol_holding_users') || '{}');
+      if (users[currentUser]) {
+        users[currentUser].state = gameState;
+        localStorage.setItem('erol_holding_users', JSON.stringify(users));
+      }
+    }
+
+    // Sekmeler
     function switchTab(tabId) {
       playSound(400, 0.05);
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -238,32 +335,32 @@
     }
 
     function calculateIncome() {
-      let baseIncome = businesses.reduce((acc, b) => acc + (b.income * b.count * b.level), 0);
-      let multiplier = prestigeMultiplier;
-      executives.forEach(e => { if (e.hired) multiplier *= e.boost; });
+      let baseIncome = gameState.businesses.reduce((acc, b) => acc + (b.income * b.count * b.level), 0);
+      let multiplier = gameState.prestigeMultiplier;
+      gameState.executives.forEach(e => { if (e.hired) multiplier *= e.boost; });
       incomePerSec = baseIncome * multiplier;
     }
 
     function render() {
-      document.getElementById('balance-display').innerText = '$' + Math.floor(balance).toLocaleString('en-US');
+      document.getElementById('balance-display').innerText = '$' + Math.floor(gameState.balance).toLocaleString('en-US');
       document.getElementById('income-display').innerText = '+$' + Math.floor(incomePerSec).toLocaleString('en-US') + '/sn';
-      document.getElementById('debt-display').innerText = '$' + Math.floor(debt).toLocaleString('en-US');
-      document.getElementById('prestige-display').innerText = prestigeMultiplier.toFixed(1) + 'x';
-      document.getElementById('player-rank').innerText = getRank(balance);
+      document.getElementById('debt-display').innerText = '$' + Math.floor(gameState.debt).toLocaleString('en-US');
+      document.getElementById('prestige-display').innerText = gameState.prestigeMultiplier.toFixed(1) + 'x';
+      document.getElementById('player-rank').innerText = getRank(gameState.balance);
       document.getElementById('loan-info').innerText = 'Max Kredi Limiti: $' + Math.floor(maxLoan).toLocaleString('en-US');
 
-      // Şirketler Sekmesi
+      // Şirketler
       const bizContainer = document.getElementById('tab-businesses');
       bizContainer.innerHTML = '';
-      businesses.forEach((biz, index) => {
+      gameState.businesses.forEach((biz, index) => {
         const cost = Math.floor(biz.baseCost * Math.pow(1.15, biz.count));
         const upCost = Math.floor(cost * 5);
         bizContainer.innerHTML += `
           <div class="card">
             <div class="card-head"><span class="card-title">${biz.name} (Lvl ${biz.level})</span><span class="card-count">x${biz.count}</span></div>
             <div class="card-info">Saniyelik Getiri: +$${(biz.income * biz.level).toLocaleString('en-US')}/sn<br>Satın Al: $${cost.toLocaleString('en-US')}</div>
-            <button class="btn" ${balance < cost ? 'disabled' : ''} onclick="buyBusiness(${index})">YATIRIM YAP</button>
-            <button class="btn btn-blue" style="margin-top:5px;" ${balance < upCost ? 'disabled' : ''} onclick="upgradeBusiness(${index})">SEVİYE YÜKSELT ($${upCost.toLocaleString('en-US')})</button>
+            <button class="btn" ${gameState.balance < cost ? 'disabled' : ''} onclick="buyBusiness(${index})">YATIRIM YAP</button>
+            <button class="btn btn-blue" style="margin-top:5px;" ${gameState.balance < upCost ? 'disabled' : ''} onclick="upgradeBusiness(${index})">SEVİYE YÜKSELT ($${upCost.toLocaleString('en-US')})</button>
           </div>
         `;
       });
@@ -271,12 +368,12 @@
       // Yöneticiler
       const execContainer = document.getElementById('tab-executives');
       execContainer.innerHTML = '';
-      executives.forEach((exec, index) => {
+      gameState.executives.forEach((exec, index) => {
         execContainer.innerHTML += `
           <div class="card">
             <div class="card-head"><span class="card-title">${exec.name}</span><span class="card-count">${exec.hired ? 'BÜNYEMİZDE' : 'BOŞTA'}</span></div>
             <div class="card-info">${exec.desc}<br>Maliyet: $${exec.cost.toLocaleString('en-US')}</div>
-            <button class="btn" ${exec.hired || balance < exec.cost ? 'disabled' : ''} onclick="hireExec(${index})">${exec.hired ? 'İŞE ALINDI' : 'TRANSFER ET'}</button>
+            <button class="btn" ${exec.hired || gameState.balance < exec.cost ? 'disabled' : ''} onclick="hireExec(${index})">${exec.hired ? 'İŞE ALINDI' : 'TRANSFER ET'}</button>
           </div>
         `;
       });
@@ -284,93 +381,97 @@
       // Borsa
       const stockContainer = document.getElementById('tab-stocks');
       stockContainer.innerHTML = '';
-      stocks.forEach((st, index) => {
+      gameState.stocks.forEach((st, index) => {
         stockContainer.innerHTML += `
           <div class="card">
             <div class="card-head"><span class="card-title">${st.name}</span><span class="card-count">${st.shares} Adet</span></div>
             <div class="card-info">Anlık Hisse Fiyatı: $${Math.floor(st.price).toLocaleString('en-US')}</div>
-            <button class="btn" ${balance < st.price ? 'disabled' : ''} onclick="buyStock(${index})">1 ADET HİSSE AL</button>
+            <button class="btn" ${gameState.balance < st.price ? 'disabled' : ''} onclick="buyStock(${index})">1 ADET HİSSE AL</button>
             <button class="btn btn-red" style="margin-top:5px;" ${st.shares <= 0 ? 'disabled' : ''} onclick="sellStock(${index})">1 ADET HİSSE SAT</button>
           </div>
         `;
       });
     }
 
-    // Şirket Alım & Yükseltme
+    // İşlemler
     function buyBusiness(i) {
-      const biz = businesses[i];
+      const biz = gameState.businesses[i];
       const cost = Math.floor(biz.baseCost * Math.pow(1.15, biz.count));
-      if (balance >= cost) {
+      if (gameState.balance >= cost) {
         playSound(600, 0.1);
-        balance -= cost;
+        gameState.balance -= cost;
         biz.count++;
         calculateIncome();
         render();
+        saveGame();
       }
     }
 
     function upgradeBusiness(i) {
-      const biz = businesses[i];
+      const biz = gameState.businesses[i];
       const cost = Math.floor(biz.baseCost * Math.pow(1.15, biz.count)) * 5;
-      if (balance >= cost) {
+      if (gameState.balance >= cost) {
         playSound(900, 0.15);
-        balance -= cost;
+        gameState.balance -= cost;
         biz.level++;
         calculateIncome();
         render();
+        saveGame();
       }
     }
 
     function hireExec(i) {
-      const exec = executives[i];
-      if (balance >= exec.cost && !exec.hired) {
+      const exec = gameState.executives[i];
+      if (gameState.balance >= exec.cost && !exec.hired) {
         playSound(800, 0.15);
-        balance -= exec.cost;
+        gameState.balance -= exec.cost;
         exec.hired = true;
         calculateIncome();
         render();
+        saveGame();
       }
     }
 
-    // Borsa Alım/Satım
     function buyStock(i) {
-      const st = stocks[i];
-      if (balance >= st.price) {
+      const st = gameState.stocks[i];
+      if (gameState.balance >= st.price) {
         playSound(550, 0.08);
-        balance -= st.price;
+        gameState.balance -= st.price;
         st.shares++;
         render();
+        saveGame();
       }
     }
 
     function sellStock(i) {
-      const st = stocks[i];
+      const st = gameState.stocks[i];
       if (st.shares > 0) {
         playSound(750, 0.08);
-        balance += st.price;
+        gameState.balance += st.price;
         st.shares--;
         render();
+        saveGame();
       }
     }
 
-    // Banka & Borç Ödeme
     function takeLoan() {
-      if (debt === 0) {
+      if (gameState.debt === 0) {
         playSound(300, 0.2, "square");
-        balance += 25000;
-        debt = 30000;
+        gameState.balance += 25000;
+        gameState.debt = 30000;
         render();
+        saveGame();
       }
     }
 
-    // İSTEDİĞİN ÖZEL DÜZELTME: TÜM BORCU ÖDER
     function payAllLoan() {
-      if (debt > 0) {
-        if (balance >= debt) {
+      if (gameState.debt > 0) {
+        if (gameState.balance >= gameState.debt) {
           playSound(700, 0.15);
-          balance -= debt;
-          debt = 0;
+          gameState.balance -= gameState.debt;
+          gameState.debt = 0;
           render();
+          saveGame();
         } else {
           document.getElementById('news-ticker').innerText = "• UYARI: Kasadaki nakit paranız tüm borcu kapatmaya yetmiyor!";
           playSound(150, 0.3, "sawtooth");
@@ -378,34 +479,34 @@
       }
     }
 
-    // Casino
     function playRoulette(amount) {
-      if (balance >= amount) {
-        balance -= amount;
+      if (gameState.balance >= amount) {
+        gameState.balance -= amount;
         if (Math.random() > 0.5) {
           playSound(1000, 0.2);
-          balance += amount * 2;
+          gameState.balance += amount * 2;
           document.getElementById('news-ticker').innerText = "• KAZANDINIZ! Casino ruletinde $" + (amount * 2).toLocaleString() + " kazanç sağladınız!";
         } else {
           playSound(200, 0.2, "sawtooth");
           document.getElementById('news-ticker').innerText = "• KAYBETTİNİZ! Casino ruletinde $" + amount.toLocaleString() + " kaybettiniz.";
         }
         render();
+        saveGame();
       }
     }
 
-    // Prestij (Rebirth)
     function doPrestige() {
-      if (balance >= 5000000) {
+      if (gameState.balance >= 5000000) {
         playSound(1200, 0.4);
-        prestigeMultiplier += 1.5;
-        balance = 10000;
-        debt = 0;
-        businesses.forEach(b => { b.count = 0; b.level = 1; });
-        executives.forEach(e => { e.hired = false; });
+        gameState.prestigeMultiplier += 1.5;
+        gameState.balance = 10000;
+        gameState.debt = 0;
+        gameState.businesses.forEach(b => { b.count = 0; b.level = 1; });
+        gameState.executives.forEach(e => { e.hired = false; });
         calculateIncome();
         render();
-        document.getElementById('news-ticker').innerText = "• REBIRTH TAMAMLANDI! Holding devredildi, kalıcı gelir çarpanınız " + prestigeMultiplier.toFixed(1) + "x oldu!";
+        saveGame();
+        document.getElementById('news-ticker').innerText = "• REBIRTH TAMAMLANDI! Holding devredildi, kalıcı gelir çarpanınız " + gameState.prestigeMultiplier.toFixed(1) + "x oldu!";
       } else {
         document.getElementById('news-ticker').innerText = "• Prestij yapmak için en az $5,000,000 net servete sahip olmalısınız!";
       }
@@ -413,39 +514,35 @@
 
     // Oyun Döngüsü
     setInterval(() => {
-      balance += incomePerSec;
-      maxLoan = Math.max(50000, balance * 2);
+      if (!currentUser) return;
 
-      // Hisse Fiyatlarını Rastgele Dalgalandır
-      stocks.forEach(st => {
-        const change = (Math.random() - 0.48) * 10;
+      gameState.balance += incomePerSec;
+      maxLoan = Math.max(50000, gameState.balance * 2);
+
+      gameState.stocks.forEach(st => {
+        const change = (Math.random() - 0.48) * 12;
         st.price = Math.max(10, st.price + change);
       });
 
       chartData.shift();
-      chartData.push(balance);
+      chartData.push(gameState.balance);
       marketChart.update();
 
       render();
+      saveGame();
     }, 1000);
 
-    // Rastgele Piyasa Haberleri
-    const events = [
-      { text: "• YAZILIM SEKTÖRÜ PATLADI: AI Şirketlerinin hisseleri tavan yaptı!", effect: () => balance *= 1.05 },
-      { text: "• MERKEZ BANKASI FAİZ ARTIRDI: Şirket harcamaları arttı.", effect: () => balance *= 0.98 }
-    ];
-
-    setInterval(() => {
-      if (incomePerSec > 0) {
-        const ev = events[Math.floor(Math.random() * events.length)];
-        document.getElementById('news-ticker').innerText = ev.text;
-        ev.effect();
-        render();
+    // Otomatik Giriş Kontrolü
+    window.onload = () => {
+      const active = localStorage.getItem('erol_holding_active_user');
+      if (active) {
+        let users = JSON.parse(localStorage.getItem('erol_holding_users') || '{}');
+        if (users[active]) {
+          gameState = users[active].state;
+          loginUserSuccess(active);
+        }
       }
-    }, 18000);
-
-    calculateIncome();
-    render();
+    };
   </script>
 </body>
 </html>
