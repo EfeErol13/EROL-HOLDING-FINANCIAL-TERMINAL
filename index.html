@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EROL HOLDING - FINANCIAL TERMINAL v6.0</title>
+  <title>EROL HOLDING - FINANCIAL TERMINAL v6.1</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -96,7 +96,7 @@
   <header>
     <div class="brand">
       <div class="pulse-dot"></div>
-      EROL HOLDING FINANCIAL TERMINAL v6.0
+      EROL HOLDING FINANCIAL TERMINAL v6.1
     </div>
     <div class="user-info-badge">
       <span style="font-family:monospace; font-size:0.75rem; color:var(--gray);" id="currentUserDisplay">Giriş Yapılmadı</span>
@@ -134,13 +134,13 @@
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab(event, 'businesses')">ŞİRKETLERİM</button>
-    <button class="tab-btn" onclick="switchTab(event, 'factories')">FABRİKALAR & AR-GE</button>
-    <button class="tab-btn" onclick="switchTab(event, 'realestate')">EMLAK & LÜKS GARAJ</button>
-    <button class="tab-btn" onclick="switchTab(event, 'stocks')">BORSA & KRİPTO</button>
-    <button class="tab-btn" onclick="switchTab(event, 'executives')">YÖNETİCİLER</button>
-    <button class="tab-btn" onclick="switchTab(event, 'casino')">VIP CASINO</button>
-    <button class="tab-btn" onclick="switchTab(event, 'prestige')">PRESTİJ & REBIRTH</button>
+    <button class="tab-btn active" data-tab="businesses" onclick="switchTab('businesses')">ŞİRKETLERİM</button>
+    <button class="tab-btn" data-tab="factories" onclick="switchTab('factories')">FABRİKALAR & AR-GE</button>
+    <button class="tab-btn" data-tab="realestate" onclick="switchTab('realestate')">EMLAK & LÜKS GARAJ</button>
+    <button class="tab-btn" data-tab="stocks" onclick="switchTab('stocks')">BORSA & KRİPTO</button>
+    <button class="tab-btn" data-tab="executives" onclick="switchTab('executives')">YÖNETİCİLER</button>
+    <button class="tab-btn" data-tab="casino" onclick="switchTab('casino')">VIP CASINO</button>
+    <button class="tab-btn" data-tab="prestige" onclick="switchTab('prestige')">PRESTİJ & REBIRTH</button>
   </div>
 
   <div class="tab-content active" id="tab-businesses"></div>
@@ -168,7 +168,7 @@
 
   <footer>
     <div>SECURE DATABASE SYSTEM</div>
-    <div>ULTIMATE FINANCIAL CORE v6.0</div>
+    <div>ULTIMATE FINANCIAL CORE v6.1</div>
   </footer>
 
   <script>
@@ -337,12 +337,25 @@
       }
     }
 
-    function switchTab(evt, tabId) {
+    // SEKME DEĞİŞTİRME KESİN ÇÖZÜM
+    function switchTab(tabId) {
       playSound(400, 0.05);
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-      evt.currentTarget.classList.add('active');
-      document.getElementById('tab-' + tabId).classList.add('active');
+      
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-tab') === tabId) {
+          btn.classList.add('active');
+        }
+      });
+
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+
+      const activeTab = document.getElementById('tab-' + tabId);
+      if (activeTab) {
+        activeTab.classList.add('active');
+      }
     }
 
     function getRank(val) {
@@ -626,7 +639,6 @@
       gameState.balance += incomePerSec;
       maxLoan = Math.max(50000, gameState.balance * 2);
 
-      // Dinamik Borsa Dalgalanması
       gameState.stocks.forEach(st => {
         let percent = (Math.random() - 0.48) * (st.type === 'crypto' ? 0.08 : 0.03);
         st.price = Math.max(10, st.price * (1 + percent));
