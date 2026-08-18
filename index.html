@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EROL HOLDING - FINANCIAL TERMINAL v5.0</title>
+  <title>EROL HOLDING - FINANCIAL TERMINAL v6.0</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -96,7 +96,7 @@
   <header>
     <div class="brand">
       <div class="pulse-dot"></div>
-      EROL HOLDING FINANCIAL TERMINAL v5.0
+      EROL HOLDING FINANCIAL TERMINAL v6.0
     </div>
     <div class="user-info-badge">
       <span style="font-family:monospace; font-size:0.75rem; color:var(--gray);" id="currentUserDisplay">Giriş Yapılmadı</span>
@@ -134,13 +134,13 @@
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('businesses')">ŞİRKETLERİM</button>
-    <button class="tab-btn" onclick="switchTab('factories')">FABRİKALAR & AR-GE</button>
-    <button class="tab-btn" onclick="switchTab('realestate')">EMLAK & LÜKS GARAJ</button>
-    <button class="tab-btn" onclick="switchTab('stocks')">BORSA & KRİPTO</button>
-    <button class="tab-btn" onclick="switchTab('executives')">YÖNETİCİLER</button>
-    <button class="tab-btn" onclick="switchTab('casino')">VIP CASINO</button>
-    <button class="tab-btn" onclick="switchTab('prestige')">PRESTİJ & REBIRTH</button>
+    <button class="tab-btn active" onclick="switchTab(event, 'businesses')">ŞİRKETLERİM</button>
+    <button class="tab-btn" onclick="switchTab(event, 'factories')">FABRİKALAR & AR-GE</button>
+    <button class="tab-btn" onclick="switchTab(event, 'realestate')">EMLAK & LÜKS GARAJ</button>
+    <button class="tab-btn" onclick="switchTab(event, 'stocks')">BORSA & KRİPTO</button>
+    <button class="tab-btn" onclick="switchTab(event, 'executives')">YÖNETİCİLER</button>
+    <button class="tab-btn" onclick="switchTab(event, 'casino')">VIP CASINO</button>
+    <button class="tab-btn" onclick="switchTab(event, 'prestige')">PRESTİJ & REBIRTH</button>
   </div>
 
   <div class="tab-content active" id="tab-businesses"></div>
@@ -168,11 +168,11 @@
 
   <footer>
     <div>SECURE DATABASE SYSTEM</div>
-    <div>ULTIMATE FINANCIAL CORE v5.0</div>
+    <div>ULTIMATE FINANCIAL CORE v6.0</div>
   </footer>
 
   <script>
-    const INITIAL_BALANCE = 10000; // Dengeli Başlangıç: 10 Bin Dolar
+    const INITIAL_BALANCE = 10000;
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(freq, duration, type="sine") {
@@ -204,9 +204,9 @@
     ];
 
     const defaultFactories = [
-      { id: 'microchip', name: 'Yarı İletken & Mikroçip Fabrikası', baseCost: 500000, productionRate: 100, count: 0, rdLevel: 1 },
-      { id: 'ev_battery', name: 'Batarya & Enerji Tesisleri', baseCost: 2500000, productionRate: 500, count: 0, rdLevel: 1 },
-      { id: 'defense', name: 'Savunma Sanayi & İHA Kompleksi', baseCost: 12000000, productionRate: 2500, count: 0, rdLevel: 1 }
+      { id: 'microchip', name: 'Yarı İletken & Mikroçip Fabrikası', baseCost: 100000, productionRate: 1500, count: 0, rdLevel: 1 },
+      { id: 'ev_battery', name: 'Batarya & Enerji Tesisleri', baseCost: 750000, productionRate: 10000, count: 0, rdLevel: 1 },
+      { id: 'defense', name: 'Savunma Sanayi & İHA Kompleksi', baseCost: 5000000, productionRate: 65000, count: 0, rdLevel: 1 }
     ];
 
     const defaultRealEstate = [
@@ -311,7 +311,7 @@
       document.getElementById('authModal').style.display = 'none';
       document.getElementById('currentUserDisplay').innerText = '@' + username;
       
-      updateNewsTape("• Hoş geldiniz @" + username + "! Borsa ve sanayi piyasaları senkronize edildi.");
+      updateNewsTape("• Hoş geldiniz @" + username + "! Sanayi ve Borsa terminalleri hazır.");
       
       calculateIncome();
       render();
@@ -337,11 +337,11 @@
       }
     }
 
-    function switchTab(tabId) {
+    function switchTab(evt, tabId) {
       playSound(400, 0.05);
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-      event.target.classList.add('active');
+      evt.currentTarget.classList.add('active');
       document.getElementById('tab-' + tabId).classList.add('active');
     }
 
@@ -375,75 +375,85 @@
 
       // 1. Şirketler
       const bizContainer = document.getElementById('tab-businesses');
-      bizContainer.innerHTML = '';
-      gameState.businesses.forEach((biz, index) => {
-        const cost = Math.floor(biz.baseCost * Math.pow(1.15, biz.count));
-        const upCost = Math.floor(cost * 5);
-        bizContainer.innerHTML += `
-          <div class="card">
-            <div class="card-head"><span class="card-title">${biz.name} (Lvl ${biz.level})</span><span class="card-count">x${biz.count}</span></div>
-            <div class="card-info">Saniyelik Getiri: +$${(biz.income * biz.level).toLocaleString('en-US')}/sn<br>Satın Al: $${cost.toLocaleString('en-US')}</div>
-            <button class="btn" ${gameState.balance < cost ? 'disabled' : ''} onclick="buyBusiness(${index})">YATIRIM YAP</button>
-            <button class="btn btn-blue" style="margin-top:5px;" ${gameState.balance < upCost ? 'disabled' : ''} onclick="upgradeBusiness(${index})">SEVİYE YÜKSELT ($${upCost.toLocaleString('en-US')})</button>
-          </div>
-        `;
-      });
+      if(bizContainer) {
+        bizContainer.innerHTML = '';
+        gameState.businesses.forEach((biz, index) => {
+          const cost = Math.floor(biz.baseCost * Math.pow(1.15, biz.count));
+          const upCost = Math.floor(cost * 5);
+          bizContainer.innerHTML += `
+            <div class="card">
+              <div class="card-head"><span class="card-title">${biz.name} (Lvl ${biz.level})</span><span class="card-count">x${biz.count}</span></div>
+              <div class="card-info">Saniyelik Getiri: +$${(biz.income * biz.level).toLocaleString('en-US')}/sn<br>Satın Al: $${cost.toLocaleString('en-US')}</div>
+              <button class="btn" ${gameState.balance < cost ? 'disabled' : ''} onclick="buyBusiness(${index})">YATIRIM YAP</button>
+              <button class="btn btn-blue" style="margin-top:5px;" ${gameState.balance < upCost ? 'disabled' : ''} onclick="upgradeBusiness(${index})">SEVİYE YÜKSELT ($${upCost.toLocaleString('en-US')})</button>
+            </div>
+          `;
+        });
+      }
 
       // 2. Fabrikalar & Ar-Ge
       const facContainer = document.getElementById('tab-factories');
-      facContainer.innerHTML = '';
-      gameState.factories.forEach((fac, index) => {
-        const cost = Math.floor(fac.baseCost * Math.pow(1.2, fac.count));
-        const rdCost = Math.floor(cost * 3);
-        facContainer.innerHTML += `
-          <div class="card">
-            <div class="card-head"><span class="card-title">${fac.name}</span><span class="card-count">x${fac.count} Tesisi</span></div>
-            <div class="card-info">Ar-Ge Seviyesi: Lvl ${fac.rdLevel}<br>Üretim Satış Geliri: +$${(fac.productionRate * fac.rdLevel).toLocaleString('en-US')}/sn<br>Maliyet: $${cost.toLocaleString('en-US')}</div>
-            <button class="btn" ${gameState.balance < cost ? 'disabled' : ''} onclick="buyFactory(${index})">FABRİKA KUR</button>
-            <button class="btn btn-purple" style="margin-top:5px;" ${gameState.balance < rdCost ? 'disabled' : ''} onclick="upgradeRD(${index})">AR-GE YÜKSELT ($${rdCost.toLocaleString('en-US')})</button>
-          </div>
-        `;
-      });
+      if(facContainer) {
+        facContainer.innerHTML = '';
+        gameState.factories.forEach((fac, index) => {
+          const cost = Math.floor(fac.baseCost * Math.pow(1.25, fac.count));
+          const rdCost = Math.floor(cost * 3);
+          facContainer.innerHTML += `
+            <div class="card">
+              <div class="card-head"><span class="card-title">${fac.name}</span><span class="card-count">x${fac.count} Tesisi</span></div>
+              <div class="card-info">Ar-Ge Düzeyi: Lvl ${fac.rdLevel}<br>Otomatik Satış Geliri: +$${(fac.productionRate * fac.rdLevel * fac.count).toLocaleString('en-US')}/sn<br>Fabrika Maliyeti: $${cost.toLocaleString('en-US')}</div>
+              <button class="btn" ${gameState.balance < cost ? 'disabled' : ''} onclick="buyFactory(${index})">FABRİKA KUR</button>
+              <button class="btn btn-purple" style="margin-top:5px;" ${gameState.balance < rdCost || fac.count === 0 ? 'disabled' : ''} onclick="upgradeRD(${index})">AR-GE YÜKSELT ($${rdCost.toLocaleString('en-US')})</button>
+            </div>
+          `;
+        });
+      }
 
       // 3. Emlak & Lüks Garaj
       const estateContainer = document.getElementById('tab-realestate');
-      estateContainer.innerHTML = '';
-      gameState.realestate.forEach((item, index) => {
-        estateContainer.innerHTML += `
-          <div class="card">
-            <div class="card-head"><span class="card-title">${item.name}</span><span class="card-count">${item.owned ? 'SAHİPSİNİZ' : 'SATILIK'}</span></div>
-            <div class="card-info">Kazandırdığı İtibar: +${item.reputation} PTS<br>Fiyat: $${item.cost.toLocaleString('en-US')}</div>
-            <button class="btn btn-blue" ${item.owned || gameState.balance < item.cost ? 'disabled' : ''} onclick="buyRealEstate(${index})">${item.owned ? 'GARAJINIZDA / MÜLKÜNÜZ' : 'SATIN AL'}</button>
-          </div>
-        `;
-      });
+      if(estateContainer) {
+        estateContainer.innerHTML = '';
+        gameState.realestate.forEach((item, index) => {
+          estateContainer.innerHTML += `
+            <div class="card">
+              <div class="card-head"><span class="card-title">${item.name}</span><span class="card-count">${item.owned ? 'SAHİPSİNİZ' : 'SATILIK'}</span></div>
+              <div class="card-info">Kazandırdığı İtibar: +${item.reputation} PTS<br>Fiyat: $${item.cost.toLocaleString('en-US')}</div>
+              <button class="btn btn-blue" ${item.owned || gameState.balance < item.cost ? 'disabled' : ''} onclick="buyRealEstate(${index})">${item.owned ? 'GARAJINIZDA / MÜLKÜNÜZ' : 'SATIN AL'}</button>
+            </div>
+          `;
+        });
+      }
 
       // 4. Borsa & Kripto
       const stockContainer = document.getElementById('tab-stocks');
-      stockContainer.innerHTML = '';
-      gameState.stocks.forEach((st, index) => {
-        stockContainer.innerHTML += `
-          <div class="card">
-            <div class="card-head"><span class="card-title">${st.name}</span><span class="card-count">${st.shares} Adet</span></div>
-            <div class="card-info">Tür: ${st.type.toUpperCase()}<br>Anlık Fiyat: $${Math.floor(st.price).toLocaleString('en-US')}</div>
-            <button class="btn" ${gameState.balance < st.price ? 'disabled' : ''} onclick="buyStock(${index})">1 ADET AL</button>
-            <button class="btn btn-red" style="margin-top:5px;" ${st.shares <= 0 ? 'disabled' : ''} onclick="sellStock(${index})">1 ADET SAT</button>
-          </div>
-        `;
-      });
+      if(stockContainer) {
+        stockContainer.innerHTML = '';
+        gameState.stocks.forEach((st, index) => {
+          stockContainer.innerHTML += `
+            <div class="card">
+              <div class="card-head"><span class="card-title">${st.name}</span><span class="card-count">${st.shares} Adet</span></div>
+              <div class="card-info">Tür: ${st.type.toUpperCase()}<br>Anlık Fiyat: $${Math.floor(st.price).toLocaleString('en-US')}</div>
+              <button class="btn" ${gameState.balance < st.price ? 'disabled' : ''} onclick="buyStock(${index})">1 ADET AL</button>
+              <button class="btn btn-red" style="margin-top:5px;" ${st.shares <= 0 ? 'disabled' : ''} onclick="sellStock(${index})">1 ADET SAT</button>
+            </div>
+          `;
+        });
+      }
 
       // 5. Yöneticiler
       const execContainer = document.getElementById('tab-executives');
-      execContainer.innerHTML = '';
-      gameState.executives.forEach((exec, index) => {
-        execContainer.innerHTML += `
-          <div class="card">
-            <div class="card-head"><span class="card-title">${exec.name}</span><span class="card-count">${exec.hired ? 'BÜNYEMİZDE' : 'BOŞTA'}</span></div>
-            <div class="card-info">${exec.desc}<br>Maliyet: $${exec.cost.toLocaleString('en-US')}</div>
-            <button class="btn" ${exec.hired || gameState.balance < exec.cost ? 'disabled' : ''} onclick="hireExec(${index})">${exec.hired ? 'İŞE ALINDI' : 'TRANSFER ET'}</button>
-          </div>
-        `;
-      });
+      if(execContainer) {
+        execContainer.innerHTML = '';
+        gameState.executives.forEach((exec, index) => {
+          execContainer.innerHTML += `
+            <div class="card">
+              <div class="card-head"><span class="card-title">${exec.name}</span><span class="card-count">${exec.hired ? 'BÜNYEMİZDE' : 'BOŞTA'}</span></div>
+              <div class="card-info">${exec.desc}<br>Maliyet: $${exec.cost.toLocaleString('en-US')}</div>
+              <button class="btn" ${exec.hired || gameState.balance < exec.cost ? 'disabled' : ''} onclick="hireExec(${index})">${exec.hired ? 'İŞE ALINDI' : 'TRANSFER ET'}</button>
+            </div>
+          `;
+        });
+      }
     }
 
     function buyBusiness(i) {
@@ -474,7 +484,7 @@
 
     function buyFactory(i) {
       const fac = gameState.factories[i];
-      const cost = Math.floor(fac.baseCost * Math.pow(1.2, fac.count));
+      const cost = Math.floor(fac.baseCost * Math.pow(1.25, fac.count));
       if (gameState.balance >= cost) {
         playSound(500, 0.15);
         gameState.balance -= cost;
@@ -487,8 +497,8 @@
 
     function upgradeRD(i) {
       const fac = gameState.factories[i];
-      const cost = Math.floor(fac.baseCost * Math.pow(1.2, fac.count)) * 3;
-      if (gameState.balance >= cost) {
+      const cost = Math.floor(fac.baseCost * Math.pow(1.25, fac.count)) * 3;
+      if (gameState.balance >= cost && fac.count > 0) {
         playSound(850, 0.2);
         gameState.balance -= cost;
         fac.rdLevel++;
