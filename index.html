@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EROL HOLDING - FINANCIAL TERMINAL v6.1</title>
+  <title>EROL HOLDING - FINANCIAL TERMINAL v6.2</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -96,7 +96,7 @@
   <header>
     <div class="brand">
       <div class="pulse-dot"></div>
-      EROL HOLDING FINANCIAL TERMINAL v6.1
+      EROL HOLDING FINANCIAL TERMINAL v6.2
     </div>
     <div class="user-info-badge">
       <span style="font-family:monospace; font-size:0.75rem; color:var(--gray);" id="currentUserDisplay">Giriş Yapılmadı</span>
@@ -168,7 +168,7 @@
 
   <footer>
     <div>SECURE DATABASE SYSTEM</div>
-    <div>ULTIMATE FINANCIAL CORE v6.1</div>
+    <div>ULTIMATE FINANCIAL CORE v6.2 (AUTO REPAIR ENABLED)</div>
   </footer>
 
   <script>
@@ -245,6 +245,33 @@
       stocks: JSON.parse(JSON.stringify(defaultStocks))
     };
 
+    // OTOMATİK VERİ TAMİRİ VE VERSİYON YÜKSELTEÇİ
+    function autoRepairSaveData(loadedState) {
+      if (!loadedState) return JSON.parse(JSON.stringify(gameState));
+
+      if (!loadedState.factories || !Array.isArray(loadedState.factories)) {
+        loadedState.factories = JSON.parse(JSON.stringify(defaultFactories));
+      }
+      if (!loadedState.realestate || !Array.isArray(loadedState.realestate)) {
+        loadedState.realestate = JSON.parse(JSON.stringify(defaultRealEstate));
+      }
+      if (!loadedState.executives || !Array.isArray(loadedState.executives)) {
+        loadedState.executives = JSON.parse(JSON.stringify(defaultExecutives));
+      }
+      if (!loadedState.stocks || !Array.isArray(loadedState.stocks)) {
+        loadedState.stocks = JSON.parse(JSON.stringify(defaultStocks));
+      }
+      if (!loadedState.businesses || !Array.isArray(loadedState.businesses)) {
+        loadedState.businesses = JSON.parse(JSON.stringify(defaultBusinesses));
+      }
+
+      if (typeof loadedState.reputation === 'undefined') loadedState.reputation = 0;
+      if (typeof loadedState.prestigeMultiplier === 'undefined') loadedState.prestigeMultiplier = 1.0;
+      if (typeof loadedState.debt === 'undefined') loadedState.debt = 0;
+
+      return loadedState;
+    }
+
     let incomePerSec = 0;
     let maxLoan = 50000;
 
@@ -301,7 +328,11 @@
         return;
       }
 
-      gameState = users[u].state;
+      // ESKİ HESABIN VERİSİNİ TAMİR ET VE YÜKLE
+      gameState = autoRepairSaveData(users[u].state);
+      users[u].state = gameState; 
+      localStorage.setItem('erol_holding_users', JSON.stringify(users));
+
       loginUserSuccess(u);
     }
 
@@ -311,7 +342,7 @@
       document.getElementById('authModal').style.display = 'none';
       document.getElementById('currentUserDisplay').innerText = '@' + username;
       
-      updateNewsTape("• Hoş geldiniz @" + username + "! Sanayi ve Borsa terminalleri hazır.");
+      updateNewsTape("• Hoş geldiniz @" + username + "! Hesabınız v6.2 standartlarına yükseltildi.");
       
       calculateIncome();
       render();
@@ -337,7 +368,6 @@
       }
     }
 
-    // SEKME DEĞİŞTİRME KESİN ÇÖZÜM
     function switchTab(tabId) {
       playSound(400, 0.05);
       
@@ -371,9 +401,11 @@
       let facIncome = gameState.factories.reduce((acc, f) => acc + (f.productionRate * f.count * f.rdLevel), 0);
       
       let baseIncome = bizIncome + facIncome;
-      let multiplier = gameState.prestigeMultiplier;
+      let multiplier = gameState.prestigeMultiplier || 1.0;
       
-      gameState.executives.forEach(e => { if (e.hired) multiplier *= e.boost; });
+      if (gameState.executives) {
+        gameState.executives.forEach(e => { if (e.hired) multiplier *= e.boost; });
+      }
       incomePerSec = baseIncome * multiplier;
     }
 
@@ -382,7 +414,7 @@
       document.getElementById('income-display').innerText = '+$' + Math.floor(incomePerSec).toLocaleString('en-US') + '/sn';
       document.getElementById('debt-display').innerText = '$' + Math.floor(gameState.debt).toLocaleString('en-US');
       document.getElementById('reputation-display').innerText = (gameState.reputation || 0).toLocaleString('en-US') + ' PTS';
-      document.getElementById('prestige-display').innerText = gameState.prestigeMultiplier.toFixed(1) + 'x';
+      document.getElementById('prestige-display').innerText = (gameState.prestigeMultiplier || 1.0).toFixed(1) + 'x';
       document.getElementById('player-rank').innerText = getRank(gameState.balance);
       document.getElementById('loan-info').innerText = 'Max Kredi Limiti: $' + Math.floor(maxLoan).toLocaleString('en-US');
 
@@ -527,7 +559,7 @@
         playSound(1000, 0.25);
         gameState.balance -= estate.cost;
         estate.owned = true;
-        gameState.reputation += estate.reputation;
+        gameState.reputation = (gameState.reputation || 0) + estate.reputation;
         render();
         saveGame();
       }
@@ -611,7 +643,7 @@
     function doPrestige() {
       if (gameState.balance >= 5000000) {
         playSound(1200, 0.4);
-        gameState.prestigeMultiplier += 1.5;
+        gameState.prestigeMultiplier = (gameState.prestigeMultiplier || 1.0) + 1.5;
         gameState.balance = INITIAL_BALANCE;
         gameState.debt = 0;
         gameState.businesses.forEach(b => { b.count = 0; b.level = 1; });
@@ -639,10 +671,12 @@
       gameState.balance += incomePerSec;
       maxLoan = Math.max(50000, gameState.balance * 2);
 
-      gameState.stocks.forEach(st => {
-        let percent = (Math.random() - 0.48) * (st.type === 'crypto' ? 0.08 : 0.03);
-        st.price = Math.max(10, st.price * (1 + percent));
-      });
+      if (gameState.stocks) {
+        gameState.stocks.forEach(st => {
+          let percent = (Math.random() - 0.48) * (st.type === 'crypto' ? 0.08 : 0.03);
+          st.price = Math.max(10, st.price * (1 + percent));
+        });
+      }
 
       chartData.shift();
       chartData.push(gameState.balance);
@@ -664,7 +698,9 @@
       if (active) {
         let users = JSON.parse(localStorage.getItem('erol_holding_users') || '{}');
         if (users[active]) {
-          gameState = users[active].state;
+          gameState = autoRepairSaveData(users[active].state);
+          users[active].state = gameState;
+          localStorage.setItem('erol_holding_users', JSON.stringify(users));
           loginUserSuccess(active);
         }
       }
